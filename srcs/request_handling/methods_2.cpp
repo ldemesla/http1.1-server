@@ -5,6 +5,7 @@ bool					ft_put(t_client &client)
     int fd;
 	char buffer[BUFFER_SIZE + 1];
 	std::string file_name;
+    std::string encoding[3] = {"chunked", "chunked, gzip", "gzip, chunked"};
     std::map<std::string, std::string>::iterator it;
     std::map<std::string, std::string>::iterator end;
     std::map<std::string, std::string>::iterator it2;
@@ -14,9 +15,7 @@ bool					ft_put(t_client &client)
     client.request.pt_data.end = 0;
     it = client.request.headers.find("Transfer-Encoding");
     it2 = client.request.headers.find("Content-Length");
-    it3 = client.request.headers.find("Transfer-Encoding");
-    if ((it != client.request.headers.end() && (!it->second.compare("chunked") || !it->second.compare("chunked, gzip") || !it->second.compare("gzip, chunked")))
-    || (it3 != client.request.headers.end() && (!it3->second.compare("chunked") || !it3->second.compare("chunked, gzip") || !it3->second.compare("gzip, chunked"))))
+    if (it != client.request.headers.end() && (!encoding[0].compare(0, encoding[0].size(), it->second) || !encoding[1].compare(0, encoding[1].size(), it->second) || !encoding[2].compare(0, encoding[2].size(), it->second)))
     {
         client.request.pt_data.size = -1;
         client.request.pt_data.end = unchunk_data(client);
@@ -75,11 +74,11 @@ bool					ft_put(t_client &client)
 	    ft_send(client);
         client.request.pt_data.on = 0;
         client.request.bytes_read = 0;
-        it = client.request.headers.find("Content-Encoding");
-        it2 = client.request.headers.find("Transfer-Encoding");
-        end = client.request.headers.end();
-        if ((it != end && (!it->second.compare("chunked, gzip") || !it->second.compare("gzip") || !it->second.compare("gzip, chunked")))
-        || (it2 != end && (!it2->second.compare("chunked, gzip") || !it2->second.compare("gzip") || !it2->second.compare("gzip, chunked"))))
+        it = client.request.headers.find("Transfer-Encoding");
+        it3 = client.request.headers.find("Content-Encoding");
+        encoding[0] = "gzip";
+        if ((it != client.request.headers.end() && (!encoding[0].compare(0, encoding[0].size(), it->second) || !encoding[1].compare(0, encoding[1].size(), it->second) || !encoding[2].compare(0, encoding[2].size(), it->second)))
+        || (it3 != client.request.headers.end() && (!encoding[0].compare(0, encoding[0].size(), it3->second) || !encoding[1].compare(0, encoding[1].size(), it3->second) || !encoding[2].compare(0, encoding[2].size(), it3->second))))
             ft_inflate_file_fd(file_name);
         return (false);
     }

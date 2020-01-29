@@ -23,8 +23,7 @@ bool check_error_header(t_request &request, t_server *server)
 {
     std::map<std::string, std::string>::iterator it;
     std::map<std::string, std::string>::iterator end;
-    std::string multipart("application/x-www-form-urlencoded");
-    std::string multipart2("multipart/");
+    std::string multipart("multipart/");
 
     end = request.headers.end();
     it = request.headers.find("Host");
@@ -74,7 +73,7 @@ bool check_error_header(t_request &request, t_server *server)
         return (false);
     }
     it = request.headers.find("Content-Type");
-    if (it != end && (!multipart.compare(0, multipart.size(), it->second) || !it->second.compare(0, multipart2.size(), multipart2)))
+    if (it != end && (!multipart.compare(0, multipart.size(), it->second)))
     {
         request.res = "HTTP/1.1 400 Bad Request\r\n\r\n";
         return (false);
@@ -115,6 +114,16 @@ bool check_error_header(t_request &request, t_server *server)
             return (false);
         }
     }
+    else
+    {
+        std::string encoding[3] = {"chunked", "chunked, gzip", "gzip, chunked"};
+        it = request.headers.find("Transfer-Encoding");
+        if (it !=end && (!encoding[0].compare(0, encoding[0].size(), it->second) ||  !encoding[1].compare(0, encoding[1].size(), it->second)
+        || !encoding[2].compare(0, encoding[2].size(), it->second)))
+            return (true);
+        request.res = "HTTP/1.1 400 Bad Request\r\n\r\n";
+        return (false);
+    }
     return (true);
 }
 
@@ -125,7 +134,7 @@ bool parse_header(t_request &request, t_server *server)
     int k;
     int l;
     int size;
-    std::string header[16] = {"Range:", "Content-Length:", "Transfer-Encoding:","Host:","If-Match:", "If-None-Match:",
+    std::string header[17] = {"Content-Encoding", "Range:", "Content-Length:", "Transfer-Encoding:","Host:","If-Match:", "If-None-Match:",
     "Content-Type:", "If-Modified-Since:", "If-Unmodified-Since:", "If-Range:", "Expires:", "Accept-Charset:", "Accept-Encoding:"
     , "Accept-Language:", "Date:", "Referer:"};
 
@@ -139,7 +148,7 @@ bool parse_header(t_request &request, t_server *server)
         else if (i + 2 < size && request.request[i] == '\r' && request.request[i + 1] == '\n' && request.request[i + 2] != '\r')
         {
             j = 0;
-            while (j < 16)
+            while (j < 17)
             {
                 k = i + 2 + header[j].size();
                 if (k < size && !request.request.compare(i + 2, header[j].size(), header[j]))

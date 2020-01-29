@@ -114,7 +114,6 @@ void ft_recv(std::vector<t_client>::iterator &it, char *buffer, std::vector<t_cl
 		FD_SET(it->fd, &ini_set_write);
 }
 
-/* a implementer dans le boucle select */
 int ft_number_of_fd_used(std::vector<t_server> &server, std::vector<t_client> &clients)
 {
 	int fd_nbr(0);
