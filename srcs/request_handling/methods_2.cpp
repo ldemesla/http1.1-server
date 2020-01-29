@@ -64,7 +64,7 @@ bool					ft_put(t_client &client)
         if (client.request.pt_data.on)
 		    fd = open(client.request.file.c_str(), O_RDWR | O_APPEND);
         else
-            fd = open(client.request.file.c_str(), O_CREAT | O_RDWR, 0666);
+            fd = open(client.request.file.c_str(), O_CREAT | O_RDWR | O_TRUNC, 0666);
         client.request.pt_data.on = 1;
         client.request.bytes_read += write(fd, client.request.request.c_str(), client.request.request.size());
 		chdir(buffer);

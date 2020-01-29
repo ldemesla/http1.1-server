@@ -21,8 +21,6 @@ std::string	ft_get_get_var(const char *s)
 				get_var += s[i++];
 		}
 	}
-	std::cout << "avec s = " << s << std::endl;
-	std::cout << "get_var get_var = \n" << get_var << std::endl;
 	return (get_var);
 }
 

@@ -109,6 +109,7 @@ bool					ft_post(t_client &client)
 		write(fd, client.request.pt_data.compress_req.c_str(), client.request.pt_data.compress_req.size());
 		close(fd);
 		client.request.request = ft_inflate_file(temp);
+		std::cout << client.request.request << std::endl;
     }
     if (client.request.pt_data.end == -1)
     {

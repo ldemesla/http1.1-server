@@ -77,6 +77,8 @@ int unchunk_data(t_client &client)
         last_chunk = 0;
         if (is_chunk_size(client.request.request, i, client))
         {
+            if (k != 0)
+                k = k - 2;
             if (k != chunk_size)
             {
                 client.request.res = "HTTP/1.1 400 Bad Request\r\n\r\n";
@@ -101,6 +103,7 @@ int unchunk_data(t_client &client)
         k++;
         i++;
     }
+    remove_crlf(new_request, last_chunk, chunk_size);
     if (k != chunk_size)
     {
         client.request.res = "HTTP/1.1 400 Bad Request\r\n\r\n";
