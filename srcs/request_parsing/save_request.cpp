@@ -4,6 +4,8 @@ bool check_method_exist(t_request &request)
 {
     int i;
     t_methods methods;
+    std::string temp;
+    std::string version("HTTP/1.1");
     
     i = 0;
     while (i < METHODS_NBR)
@@ -11,6 +13,15 @@ bool check_method_exist(t_request &request)
         if (!request.request.compare(0, methods.methods[i].size(), methods.methods[i]))
         {
             request.method = request.request.substr(0, methods.methods[i].size() - 2);
+            i = 0;
+            while (request.request[i] != '\r')
+                i++;
+            temp = request.request.substr(request.method.size() + 1, i - (request.method.size() + 1));
+            i = 0;
+            while (temp[i] && temp[i] != ' ')
+                i++;
+            if (!temp[i] || temp[i] != ' ' || temp.find(version) == (unsigned long)-1)
+                i = METHODS_NBR;
             break ;
         }
         i++;
