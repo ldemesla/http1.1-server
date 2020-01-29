@@ -116,8 +116,9 @@ void ft_php_cgi(t_client &client)
 	std::string flag("-q");
 	std::vector<char *>		vector_envp;
 	
+	std::cout << client.request.request << std::endl;
 	post_args += ft_get_post_var(client.request.request.c_str());
-	if (client.request.method.compare("GET") && (client.request.pt_data.size > client.request.bytes_read) && !client.request.pt_data.end)
+	if (client.request.method.compare("GET") && (client.request.pt_data.size > client.request.bytes_read) && !client.request.pt_data.end && client.request.pt_data.size > (int)client.request.pt_data.size > client.request.bytes_read)
 		return ;
 	get_args = ft_get_get_var(client.request.header_string.c_str());
 	vector_envp = ft_set_vector_envp(client, client.request.file, get_args, !client.request.method.compare("GET") ? nothing : post_args);
@@ -131,7 +132,11 @@ void ft_php_cgi(t_client &client)
 		error("open() #1", true);
 	char	*envp[vector_envp.size()];
 	for (int i(0); i < (int)vector_envp.size(); i++)
+	{
 		envp[i] = vector_envp[i];
+		if (envp[i] != NULL)
+			std::cout << "envp[i] == " << envp[i] << std::endl;
+	}
 	pipe(pipe_fd);
 	int ret_a_supperimer;
 	if ((ret_a_supperimer = write(pipe_fd[1], post_args.c_str(), post_args.size())) < 0)

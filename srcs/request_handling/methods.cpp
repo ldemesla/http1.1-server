@@ -88,7 +88,7 @@ bool					ft_post(t_client &client)
     || (it3 != client.request.headers.end() && (!it3->second.compare("chunked") || !it3->second.compare("chunked, gzip") || !it3->second.compare("gzip, chunked"))))
     {
         client.request.pt_data.size = -1;
-        client.request.pt_data.end = unchunk_data(client);
+        client.request.pt_data.end = 1;
     }
     else
         client.request.pt_data.size = std::stoi(it2->second);
@@ -109,7 +109,6 @@ bool					ft_post(t_client &client)
 		write(fd, client.request.pt_data.compress_req.c_str(), client.request.pt_data.compress_req.size());
 		close(fd);
 		client.request.request = ft_inflate_file(temp);
-		std::cout << client.request.request << std::endl;
     }
     if (client.request.pt_data.end == -1)
     {
@@ -129,7 +128,7 @@ bool					ft_post(t_client &client)
 		client.request.file_size = info.st_size;
 		client.request.res = generate_200_header(0, client.request.file, client.request.file_size);
 	}
-	if ((client.request.pt_data.size > client.request.bytes_read) && !client.request.pt_data.end)
+	if ((client.request.pt_data.size > client.request.bytes_read) && !client.request.pt_data.end && client.request.pt_data.size > (int)client.request.pt_data.compress_req.size())
 	{
 		close(client.read_fd);
 		return (true);
