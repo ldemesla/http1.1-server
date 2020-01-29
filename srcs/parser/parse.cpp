@@ -20,9 +20,10 @@ void ft_parse_conf(std::vector<t_server> *server, char **av)
     std::string line_string;
 	std::string path_temp;
 
-	if (av[1] != NULL && (fd = open(av[1], O_RDONLY)) <= 0)
+	if (av[1] != NULL)
 	{
-       	error("open() #2", true);
+		if ((fd = open(av[1], O_RDONLY)) <= 0)
+	       	error("open() #2", true);
 	}
 	else
 	{
