@@ -5,9 +5,13 @@ std::string	ft_get_get_var(const char *s)
 	std::string	get_var;
 	if (s != NULL)
 	{
-		int i(-1);
+		int i(0);
 		
-		while (s[++i])
+		while (s[i] && s[i] != ' ')
+			i++;
+		while (s[i] && s[i] == ' ')
+			i++;
+		while (s[++i] && s[i] != ' ' && s[i] != '\r' && s[i] != '\n')
 			if (s[i] == '?')
 				break ;
 		if (s[i] == '?')
@@ -17,6 +21,8 @@ std::string	ft_get_get_var(const char *s)
 				get_var += s[i++];
 		}
 	}
+	std::cout << "avec s = " << s << std::endl;
+	std::cout << "get_var get_var = \n" << get_var << std::endl;
 	return (get_var);
 }
 
