@@ -88,6 +88,8 @@ void ft_accept(t_server &server, t_client &client_connection_temp, std::vector<t
 				close(client_connection_temp.fd);
 				FD_CLR(client_connection_temp.fd, &ini_set_read);
 				FD_CLR(client_connection_temp.fd, &ini_set_write);
+				SSL_shutdown(client_connection_temp.ssl_fd);
+				SSL_free(client_connection_temp.ssl_fd);
 				return;
 			}
 		}
