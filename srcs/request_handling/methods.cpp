@@ -83,17 +83,16 @@ bool					ft_post(t_client &client)
 	client.request.pt_data.size = 0;
 	it = client.request.headers.find("Transfer-Encoding");
     it2 = client.request.headers.find("Content-Length");
-	it3 = client.request.headers.find("Transfer-Encoding");
-    if ((it != client.request.headers.end() && (!it->second.compare("chunked") || !it->second.compare("chunked, gzip") || !it->second.compare("gzip, chunked")))
-    || (it3 != client.request.headers.end() && (!it3->second.compare("chunked") || !it3->second.compare("chunked, gzip") || !it3->second.compare("gzip, chunked"))))
+	it3 = client.request.headers.find("Content-Encoding");
+    if (it != client.request.headers.end() && (!it->second.compare("chunked") || !it->second.compare("chunked, gzip") || !it->second.compare("gzip, chunked")))
     {
         client.request.pt_data.size = -1;
-        client.request.pt_data.end = 1;
+        client.request.pt_data.end = unchunk_data(client);
     }
     else
         client.request.pt_data.size = std::stoi(it2->second);
 	if ((it != client.request.headers.end() && (!it->second.compare("gzip") || !it->second.compare("chunked, gzip") || !it->second.compare("gzip, chunked")))
-    || (it3 != client.request.headers.end() && (!it3->second.compare("gzip") || !it3->second.compare("chunked, gzip") || !it3->second.compare("gzip, chunked"))))
+    || (it3 != client.request.headers.end() && (!it3->second.compare("gzip"))))
     {
 		client.request.pt_data.compress_req += client.request.request;
 		if (client.request.pt_data.compress_req.size() > 65000)
