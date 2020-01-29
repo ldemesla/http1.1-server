@@ -144,19 +144,39 @@ bool get_info(t_client &client)
 }
 
 
-void ft_save_request(char *buffer, std::vector<t_client>::iterator &it, int ret)
+bool ft_save_request(char *buffer, std::vector<t_client>::iterator &it, int ret)
 {
-    if (it->request.request.empty() && !it->request.pt_data.on)
+    int i;
+    int header = 0;
+
+    i = 0;
+    if (!it->request.pt_data.on)
     {
         it->request.request.append(buffer, ret);
-        if (!get_info(*it))
+        while (it->request.request[i])
         {
-            it->disconnect= 1;
+            if (i >= 3 && it->request.request[i - 3] == '\r' && it->request.request[i - 2] == '\n' && it->request.request[i - 1] == '\r' && it->request.request[i] == '\n')
+            {
+                header = 1;
+			    break ;
+            }
+            i++;
+        }
+        if (header == 1)
+        {
+            if (!get_info(*it))
+                it->disconnect= 1;
+            else
+                it->disconnect = 0;
         }
         else
-            it->disconnect = 0;
+        {
+            chdir(it->server->root.c_str());
+            return (false);
+        }
     }
     else
         it->request.request.append(buffer, ret);
     chdir(it->server->root.c_str());
+    return (true);
 }

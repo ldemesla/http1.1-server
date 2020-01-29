@@ -97,8 +97,8 @@ void	ft_recv(std::vector<t_client>::iterator &it, char *buffer, std::vector<t_cl
 		ft_disconnect_client(it, clients, ini_set_read, ini_set_write);
 		return ;
 	}
-	ft_save_request(buffer, it, ret);
-	FD_SET(it->fd, &ini_set_write);
+	if (ft_save_request(buffer, it, ret))
+		FD_SET(it->fd, &ini_set_write);
 }
 
 /* a implementer dans le boucle select */
