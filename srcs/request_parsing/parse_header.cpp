@@ -95,6 +95,12 @@ bool check_error_header(t_request &request, t_server *server)
         request.res = "HTTP/1.1 412 Precondition Failed\r\nLast-Modified: " + get_file_date(request.file) + "\r\n\r\n";
         return (false);
     }
+    it = request.headers.find("Accept-Charset");
+    if (it != end && it->second.compare("utf-8"))
+    {
+        request.res = "HTTP/1.1 406 Not Acceptable\r\nLast-Modified: " + get_file_date(request.file) + "\r\n\r\n";
+        return (false);
+    }
     it = request.headers.find("Content-Length");
     if (it != end)
     {
