@@ -88,6 +88,7 @@ int unchunk_data(t_client &client)
         new_request += client.request.request[i];
         i++;
     }
+    std::cout << new_request << std::endl;
     client.request.request = new_request;
     if (end)
     {
