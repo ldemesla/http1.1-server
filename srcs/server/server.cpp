@@ -1,12 +1,12 @@
 #include "../webserver.hpp"
 
-void	ft_disconnect_client(std::vector<t_client>::iterator &it, std::vector<t_client> &clients, fd_set &ini_set_read, fd_set &ini_set_write)
+void ft_disconnect_client(std::vector<t_client>::iterator &it, std::vector<t_client> &clients, fd_set &ini_set_read, fd_set &ini_set_write)
 {
 	close(it->fd);
 	FD_CLR(it->fd, &ini_set_read);
 	FD_CLR(it->fd, &ini_set_write);
-	if (it->ssl_fd != NULL)			
-	{	
+	if (it->ssl_fd != NULL)
+	{
 		SSL_shutdown(it->ssl_fd);
 		SSL_free(it->ssl_fd);
 		it->ssl_fd = NULL;
@@ -16,7 +16,17 @@ void	ft_disconnect_client(std::vector<t_client>::iterator &it, std::vector<t_cli
 	clients.erase(it);
 }
 
-int		ft_max_fd(std::vector<t_server>	&server, std::vector<t_client>	&clients)
+void ft_accept_disconnect(t_server &server)
+{
+	struct sockaddr_in client_addr;
+	socklen_t len;
+	int fd;
+
+	fd = accept(server.fd, (struct sockaddr *)&client_addr, &len);
+	close(fd);
+}
+
+int ft_max_fd(std::vector<t_server> &server, std::vector<t_client> &clients)
 {
 	int max(0);
 
@@ -29,10 +39,10 @@ int		ft_max_fd(std::vector<t_server>	&server, std::vector<t_client>	&clients)
 	return (max + 1);
 }
 
-int	ft_read(t_client &client, char *buffer)
+int ft_read(t_client &client, char *buffer)
 {
-	int		ret(0);
-	
+	int ret(0);
+
 	if (client.ssl_fd == NULL)
 		ret = recv(client.fd, buffer, BUFFER_SIZE, 0);
 	else
@@ -41,9 +51,9 @@ int	ft_read(t_client &client, char *buffer)
 		{
 			int ret_get_error(SSL_get_error(client.ssl_fd, ret));
 			if (ret_get_error == SSL_ERROR_WANT_READ || ret_get_error == SSL_ERROR_WANT_WRITE)
-				continue ;
+				continue;
 			else
-				break ;
+				break;
 		}
 	}
 	return (ret);
@@ -51,17 +61,18 @@ int	ft_read(t_client &client, char *buffer)
 
 void ft_accept(t_server &server, t_client &client_connection_temp, std::vector<t_client> &clients, fd_set &ini_set_read, fd_set &ini_set_write)
 {
-	struct sockaddr_in			client_addr;
-	socklen_t					len;
-	int							ret;
+	struct sockaddr_in client_addr;
+	socklen_t len;
+	int ret;
 
 	len = sizeof(client_addr);
-	if ((client_connection_temp.fd = accept(server.fd, (struct sockaddr*)&client_addr, &len)) <= 0)
+	if ((client_connection_temp.fd = accept(server.fd, (struct sockaddr *)&client_addr, &len)) <= 0)
 		error("accept", true);
 	client_connection_temp.server = &server;
 	client_connection_temp.ssl_fd = NULL;
 	client_connection_temp.read_fd = 0;
-	if (!server.TLS.compare("on") && client_connection_temp.ssl_fd == NULL)		/* tls start */
+	ft_reset_last_action_client(client_connection_temp);
+	if (!server.TLS.compare("on") && client_connection_temp.ssl_fd == NULL) /* tls start */
 	{
 		client_connection_temp.ssl_fd = SSL_new(server.ctx);
 		if (SSL_set_fd(client_connection_temp.ssl_fd, client_connection_temp.fd) <= 0)
@@ -71,44 +82,44 @@ void ft_accept(t_server &server, t_client &client_connection_temp, std::vector<t
 			int ret_get_error;
 			ret_get_error = SSL_get_error(client_connection_temp.ssl_fd, ret);
 			if (ret_get_error == SSL_ERROR_WANT_READ || ret_get_error == SSL_ERROR_WANT_WRITE)
-				continue ;
+				continue;
 			else
 			{
 				close(client_connection_temp.fd);
 				FD_CLR(client_connection_temp.fd, &ini_set_read);
 				FD_CLR(client_connection_temp.fd, &ini_set_write);
-				return ;
+				return;
 			}
 		}
 	}
-	client_connection_temp.temp_file = client_connection_temp.server->host + ":" + ft_int_to_string(client_connection_temp.server->port) + ":" + ft_int_to_string(client_connection_temp.fd);																
+	client_connection_temp.temp_file = client_connection_temp.server->host + ":" + ft_int_to_string(client_connection_temp.server->port) + ":" + ft_int_to_string(client_connection_temp.fd);
 	clients.push_back(client_connection_temp);
-	
+
 	FD_SET(client_connection_temp.fd, &ini_set_read);
 }
 
-void	ft_recv(std::vector<t_client>::iterator &it, char *buffer, std::vector<t_client> &clients, fd_set &ini_set_read, fd_set &ini_set_write)
+void ft_recv(std::vector<t_client>::iterator &it, char *buffer, std::vector<t_client> &clients, fd_set &ini_set_read, fd_set &ini_set_write)
 {
 	std::string error;
 	int ret;
-	
+
 	if ((ret = ft_read(*it, buffer)) <= 0)
 	{
 		ft_disconnect_client(it, clients, ini_set_read, ini_set_write);
-		return ;
+		return;
 	}
 	ft_save_request(buffer, it, ret);
 	FD_SET(it->fd, &ini_set_write);
 }
 
 /* a implementer dans le boucle select */
-int		ft_number_of_fd_used(std::vector<t_server> &server, std::vector<t_client> &clients)
+int ft_number_of_fd_used(std::vector<t_server> &server, std::vector<t_client> &clients)
 {
 	int fd_nbr(0);
-	
-	for (std::vector<t_server>::iterator it(server.begin());it != server.end(); it++)
+
+	for (std::vector<t_server>::iterator it(server.begin()); it != server.end(); it++)
 		fd_nbr++;
-	for (std::vector<t_client>::iterator it(clients.begin());it != clients.end(); it++)
+	for (std::vector<t_client>::iterator it(clients.begin()); it != clients.end(); it++)
 		it->read_fd == 0 ? fd_nbr++ : fd_nbr += 2;
 	return (fd_nbr + INITAL_USED_FD);
 }
@@ -116,13 +127,13 @@ int		ft_number_of_fd_used(std::vector<t_server> &server, std::vector<t_client> &
 bool need_to_disconnect(std::vector<t_client> &clients, fd_set &set, fd_set &ini_set_read, fd_set &ini_set_write)
 {
 	bool ret(false);
-	
+
 	std::vector<t_client>::iterator it = clients.begin();
 	std::vector<t_client>::iterator end = clients.end();
-	
+
 	while (it != end)
 	{
-		
+
 		if (it->disconnect == 1 && FD_ISSET(it->fd, &set) && it->read_fd == 0)
 		{
 			ft_send(*it);
@@ -132,7 +143,7 @@ bool need_to_disconnect(std::vector<t_client> &clients, fd_set &set, fd_set &ini
 			ft_disconnect_client(it, clients, ini_set_read, ini_set_write);
 			it = clients.begin();
 			ret = true;
-			continue ;
+			continue;
 		}
 		it++;
 	}
@@ -141,22 +152,22 @@ bool need_to_disconnect(std::vector<t_client> &clients, fd_set &set, fd_set &ini
 
 void ft_server(std::vector<t_server> &servers)
 {
-	int							ret;
-	char						buffer[BUFFER_SIZE + 1     ];
-	char						read_buffer[MAX_SIZE + 1     ];
-	std::string					temp_path;
-	std::string					temp_paht_2;
+	int ret;
+	char buffer[BUFFER_SIZE + 1];
+	char read_buffer[MAX_SIZE + 1];
+	std::string temp_path;
+	std::string temp_paht_2;
 
-	fd_set						ini_set_read;
-	fd_set						ret_set_read;
-	fd_set						ini_set_write;
-	fd_set						ret_set_write;
+	fd_set ini_set_read;
+	fd_set ret_set_read;
+	fd_set ini_set_write;
+	fd_set ret_set_write;
 
-	t_client					client_connection_temp;
-	std::vector<t_client>		clients;
+	t_client client_connection_temp;
+	std::vector<t_client> clients;
 
-	unsigned int				force_timeout_client(0);
-	struct timeval				time_out_select;
+	unsigned int force_timeout_client(0);
+	struct timeval time_out_select;
 
 	g_cleaner.clients = &clients;
 	g_cleaner.servers = &servers;
@@ -165,24 +176,20 @@ void ft_server(std::vector<t_server> &servers)
 	ft_init_fd_set(servers, ini_set_read, ini_set_write);
 	while (1)
 	{
-		//std::cout << "fd used " << ft_number_of_fd_used(servers, clients) << "/" << FD_LIMIT_ACCEPTED << std::endl;
 		ret_set_read = ini_set_read;
 		ret_set_write = ini_set_write;
 		time_out_select = ft_init_timeout_select(TIME_OUT_SELECT_SEC, TIME_OUT_SELECT_USEC);
-		ret = select(ft_max_fd(servers, clients), &ret_set_read, &ret_set_write, NULL, &time_out_select);
-				/* SELECT */
+		ret = select(ft_max_fd(servers, clients), &ret_set_read, &ret_set_write, NULL, &time_out_select); /* SELECT */
 		if (ret == 0 || force_timeout_client++ >= FORCE_TIME_OUT_CLIENT)
 		{
 			ft_timeout_clients(clients.begin(), clients, ini_set_read, ini_set_write);
 			force_timeout_client = 0;
-			continue ;
-		}
-		if (need_to_disconnect(clients, ret_set_write, ini_set_read, ini_set_write))
 			continue;
-		for (std::vector<t_client>::iterator it(clients.begin());it != clients.end(); it++)		/* old client */
+		}
+		for (std::vector<t_client>::iterator it(clients.begin()); it != clients.end(); it++) /* old client */
 		{
 			ft_reset_last_action_client(*it);
-			if (FD_ISSET(it->fd, &ret_set_write))												/* WRITE / CLOSE */
+			if (FD_ISSET(it->fd, &ret_set_write)) /* WRITE / CLOSE */
 			{
 				temp_paht_2 = it->server->root;
 				chdir(it->request.loc.root.c_str());
@@ -226,25 +233,19 @@ void ft_server(std::vector<t_server> &servers)
 				chdir(temp_paht_2.c_str());
 				break;
 			}
-			else if (FD_ISSET(it->fd, &ret_set_read))															/* RECV */
+			else if (FD_ISSET(it->fd, &ret_set_read)) /* RECV */
 			{
 				ft_recv(it, buffer, clients, ini_set_read, ini_set_write);
 				break;
 			}
 		}
-		for (std::vector<t_server>::iterator it(servers.begin());it != servers.end(); it++)		/* new client */
-			if (FD_ISSET(it->fd, &ret_set_read))																/* ACCECPT */
+		for (std::vector<t_server>::iterator it(servers.begin()); it != servers.end(); it++) /* new client */
+			if (FD_ISSET(it->fd, &ret_set_read))											 /* ACCECPT */
 			{
-				ft_accept(*it, client_connection_temp, clients, ini_set_read, ini_set_write);
-				ft_reset_last_action_client(client_connection_temp);
 				if (ft_number_of_fd_used(servers, clients) >= FD_LIMIT_ACCEPTED)
-				{
-					std::vector<t_client>::iterator	temp_client(clients.end());
-					--temp_client;
-					temp_client->disconnect = 1;
-					temp_client->request.res = "HTTP/1.1 500 Internal Server Error\r\nRetry-After: 30\r\n\r\n";
-					FD_SET(temp_client->fd, &ini_set_write);
-				}
+					ft_accept_disconnect(*it);
+				else
+					ft_accept(*it, client_connection_temp, clients, ini_set_read, ini_set_write);
 				break;
 			}
 	}
