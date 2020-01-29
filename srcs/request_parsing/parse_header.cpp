@@ -114,7 +114,7 @@ bool check_error_header(t_request &request, t_server *server)
             return (false);
         }
     }
-    else
+    else if (!request.method.compare("PUT") || !request.method.compare("POST"))
     {
         std::string encoding[3] = {"chunked", "chunked, gzip", "gzip, chunked"};
         it = request.headers.find("Transfer-Encoding");
