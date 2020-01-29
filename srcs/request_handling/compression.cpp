@@ -78,19 +78,19 @@ void compressed_file_fd(t_client &client, std::string file)
 void	ft_inflate_file_fd(const std::string fileName)
 {
 	int				ret;
-	char 			unzipBuffer[8192 + 1];
+	char 			unzipBuffer[DECOMPRESSED_BUFFER_SIZE + 1];
 	unsigned int	unzippedBytes;
 	std::string		unzippedData;
 	int				fd;
 	int				temp_fd;
-	char 			buffer[8192];
+	char 			buffer[DECOMPRESSED_BUFFER_SIZE + 1];
 	gzFile			inFileZ = gzopen((char *)fileName.c_str(), "rb");
 	
 	if (inFileZ == NULL)
 		return ;	
 	if ((temp_fd = open((fileName + ".gz_tmp").c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0666)) <= 0)
 		std::cerr << "error: open()" << std::endl;
-	while ((unzippedBytes = gzread(inFileZ, unzipBuffer, 8192)) > 0)
+	while ((unzippedBytes = gzread(inFileZ, unzipBuffer, DECOMPRESSED_BUFFER_SIZE)) > 0)
 			write(temp_fd, unzipBuffer, unzippedBytes);
 	gzclose(inFileZ);
 	close(temp_fd);
@@ -101,7 +101,7 @@ void	ft_inflate_file_fd(const std::string fileName)
 	}
 	if ((fd = open(fileName.c_str(), O_WRONLY | O_TRUNC, 0666)) <= 0)
 		std::cerr << "error: open()" << std::endl;
-	while ((ret = read(temp_fd, buffer, 8192)) > 0)
+	while ((ret = read(temp_fd, buffer, DECOMPRESSED_BUFFER_SIZE)) > 0)
 		write(fd, buffer, ret);
 	unlink((fileName + ".gz_tmp").c_str());
 	close(temp_fd);
@@ -110,14 +110,14 @@ void	ft_inflate_file_fd(const std::string fileName)
 
 std::string	ft_inflate_file(const std::string fileName)
 {
-	char 			unzipBuffer[8192 + 1];
+	char 			unzipBuffer[DECOMPRESSED_BUFFER_SIZE + 1];
 	unsigned int	unzippedBytes;
 	std::string		unzippedData;
 	gzFile			inFileZ = gzopen((char *)fileName.c_str(), "rb");
 	
 	if (inFileZ == NULL)
 		std::cerr << "error: gzopen()" << std::endl;
-	while ((unzippedBytes = gzread(inFileZ, unzipBuffer, 8192)) > 0)
+	while ((unzippedBytes = gzread(inFileZ, unzipBuffer, DECOMPRESSED_BUFFER_SIZE)) > 0)
 		unzippedData.append(unzipBuffer, unzippedBytes);
 	unlink(fileName.c_str());
 	gzclose(inFileZ);

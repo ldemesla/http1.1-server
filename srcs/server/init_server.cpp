@@ -13,12 +13,12 @@ void	ft_cut_conf_path(std::string &path)
 {
 	std::string new_path;
 	int	i(path.size());
-	char buffer[BUFFER_SIZE];
+	char buffer[GETCWD_BUFFER_SIZE + 1];
 
 	while (--i > 0)
 		if (path[i] == '/')
 			break;
-	new_path = getcwd(buffer, BUFFER_SIZE);
+	new_path = getcwd(buffer, GETCWD_BUFFER_SIZE);
 	new_path += "/";
 	path = path.substr(0, i);
 	new_path += path;

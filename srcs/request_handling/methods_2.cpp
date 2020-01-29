@@ -3,7 +3,7 @@
 bool					ft_put(t_client &client)
 {
     int fd;
-	char buffer[BUFFER_SIZE + 1];
+	char buffer[PUT_BUFFER_SIZE + 1];
 	std::string file_name;
     std::string encoding[3] = {"chunked", "chunked, gzip", "gzip, chunked"};
     std::map<std::string, std::string>::iterator it;
@@ -47,7 +47,7 @@ bool					ft_put(t_client &client)
 		if (client.request.loc.save.compare(""))
 		{
 			file_name = get_file_name(client.request.file.c_str());
-			getcwd(buffer, BUFFER_SIZE);
+			getcwd(buffer, PUT_BUFFER_SIZE);
 			chdir(client.server->root.c_str());
 			chdir(client.request.loc.save.c_str());
             file_name = client.request.loc.save + "/" + file_name;

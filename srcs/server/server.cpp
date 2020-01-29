@@ -44,10 +44,10 @@ int ft_read(t_client &client, char *buffer)
 	int ret(0);
 
 	if (client.ssl_fd == NULL)
-		ret = recv(client.fd, buffer, BUFFER_SIZE, 0);
+		ret = recv(client.fd, buffer, SERVER_BUFFER_SIZE, 0);
 	else
 	{
-		while ((ret = SSL_read(client.ssl_fd, buffer, BUFFER_SIZE)) <= 0)
+		while ((ret = SSL_read(client.ssl_fd, buffer, SERVER_BUFFER_SIZE)) <= 0)
 		{
 			int ret_get_error(SSL_get_error(client.ssl_fd, ret));
 			if (ret_get_error == SSL_ERROR_WANT_READ || ret_get_error == SSL_ERROR_WANT_WRITE)
@@ -154,7 +154,7 @@ bool need_to_disconnect(std::vector<t_client> &clients, fd_set &set, fd_set &ini
 void ft_server(std::vector<t_server> &servers)
 {
 	int ret;
-	char buffer[BUFFER_SIZE + 1];
+	char buffer[SERVER_BUFFER_SIZE + 1];
 	char read_buffer[MAX_SIZE + 1];
 	std::string temp_path;
 	std::string temp_paht_2;
