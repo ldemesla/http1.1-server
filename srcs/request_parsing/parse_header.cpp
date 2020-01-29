@@ -140,7 +140,7 @@ bool parse_header(t_request &request, t_server *server)
     int k;
     int l;
     int size;
-    std::string header[17] = {"Content-Encoding", "Range:", "Content-Length:", "Transfer-Encoding:","Host:","If-Match:", "If-None-Match:",
+    std::string header[17] = {"Content-Encoding:", "Range:", "Content-Length:", "Transfer-Encoding:","Host:","If-Match:", "If-None-Match:",
     "Content-Type:", "If-Modified-Since:", "If-Unmodified-Since:", "If-Range:", "Expires:", "Accept-Charset:", "Accept-Encoding:"
     , "Accept-Language:", "Date:", "Referer:"};
 
