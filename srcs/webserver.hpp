@@ -20,6 +20,7 @@
 # define DEFAULT_KEY_PEM_PATH			"../certs/key.pem"
 # define DEFAULT_CERT_PEM_PATH			"../certs/cert.pem"
 # define DEFAULT_CONF_PATH				"data/default/default.conf"
+# define MAX_HEADER_PHP_CGI				40
 
 # define TIME_OUT_SELECT_SEC			0
 # define TIME_OUT_SELECT_USEC			500000 /* 1000000 u_sec == 1 sec */
