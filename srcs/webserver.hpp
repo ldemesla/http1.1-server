@@ -24,7 +24,7 @@
 
 # define TIME_OUT_SELECT_SEC			0
 # define TIME_OUT_SELECT_USEC			500000 /* 1000000 u_sec == 1 sec */
-# define TIME_OUT_CLIENT_SEC			10
+# define TIME_OUT_CLIENT_SEC			30
 # define FORCE_TIME_OUT_CLIENT			30
 
 # define INITAL_USED_FD					2
@@ -130,11 +130,14 @@ typedef struct s_chunked
 {
 	s_chunked()
 	{
-		current_len = 0;
-		chunk_size = 0;
+		chunk_size = -1;
+		i = 0;
+		end = 0;
 	}
 	int chunk_size;
-	int current_len;
+	int i;
+	int end;
+	std::string cache;
 }t_chunked;
 
 typedef struct s_request

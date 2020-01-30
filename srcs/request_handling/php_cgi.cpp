@@ -124,7 +124,7 @@ void ft_php_cgi(t_client &client)
 	std::vector<char *> vector_envp;
 
 	post_args += ft_get_post_var(client.request.request.c_str());
-	if (client.request.method.compare("GET") && (client.request.pt_data.size > client.request.bytes_read) && !client.request.pt_data.end && client.request.pt_data.size > (int)client.request.pt_data.size > client.request.bytes_read)
+	if (client.request.method.compare("GET") && (client.request.pt_data.size > client.request.bytes_read || client.request.pt_data.size == -1) && !client.request.pt_data.end)
 		return;
 	get_args = ft_get_get_var(client.request.header_string.c_str());
 	vector_envp = ft_set_vector_envp(client, client.request.file, get_args, !client.request.method.compare("GET") ? nothing : post_args);

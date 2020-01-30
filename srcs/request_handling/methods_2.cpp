@@ -24,7 +24,7 @@ bool					ft_put(t_client &client)
         client.request.pt_data.size = std::stoi(it2->second);
     if (client.request.pt_data.end == -1)
     {
-        close(fd);
+        close(fd); 
         ft_send(client);
         client.request.pt_data.on = 0;
     }

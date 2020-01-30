@@ -1,119 +1,84 @@
 #include "../webserver.hpp"
 
-int get_size(std::string string, int pos)
+bool is_not_hex(char c)
+{
+    if ((c < '0' || c > '9') && c != 'a' && c != 'b' && c != 'c' && c != 'd' && c != 'e' && c != 'f')
+        return (true);
+    return (false);
+}
+
+bool get_chunk_size(t_client &client)
 {
     int i;
-    std::string hex_size;
 
-    i = pos;
-    while (string[i] != '\r')
-        i++;
-    if (i - pos == 1)
-        hex_size += string[pos];
-    else
-        hex_size = string.substr(pos, i);
-    return (ft_hex_to_dec(hex_size));
-}
-
-void remove_crlf(std::string &s, int last_chunk, int &chunk_size)
-{
-    if (last_chunk)
+    i = 0;
+    while (client.request.chunked.cache[i])
     {
-        s = s.substr(0, s.size() - 2);
-        chunk_size = chunk_size - 2;
-    }
-    return;
-}
-
-bool is_chunk_size(std::string chunk, int i, t_client &client)
-{
-    std::string hex = "abcdef";
-    int k;
-    if (client.request.chunked.chunk_size != client.request.chunked.current_len)
-        return (false);
-    if (chunk[i] == '\r')
-        return (false);
-    while (chunk[i])
-    {
-        if (chunk[i] < '0' || chunk[i] > '9')
-        {
-            k = 0;
-            while (k < (int)hex.size())
-            {
-                if (chunk[i] == hex[k++])
-                {
-                    break;
-                }
-            }
-            if (k == (int)hex.size())
-                break;
-        }
+        if (is_not_hex(client.request.chunked.cache[i]))
+            break ;
         i++;
     }
-    if (chunk[i] == '\r')
+    if (!client.request.chunked.cache[i])
+        return (true);
+    else if (client.request.chunked.cache[i] != '\r')
+        return (false);
+    client.request.chunked.chunk_size = ft_hex_to_dec(client.request.chunked.cache.substr(0, i));
+    i += 2;
+    client.request.chunked.cache = client.request.chunked.cache.substr(i, client.request.chunked.cache.size());
+    return (true);
+}
+
+
+bool is_chunk_complete(t_client &client)
+{
+    int i;
+    int size;
+
+    i = 0;
+    size = client.request.chunked.cache.size();
+    while (i < size && i < client.request.chunked.chunk_size + 2)
+        i++;
+    if (i == client.request.chunked.chunk_size + 2)
     {
+        client.request.request += client.request.chunked.cache.substr(0, i - 2);
+        client.request.chunked.cache = client.request.chunked.cache.substr(i, client.request.chunked.cache.size() - i);
+        client.request.chunked.chunk_size = -1;
+        client.request.chunked.i = client.request.request.size();
         return (true);
     }
     return (false);
 }
 
+bool chunk_processing(t_client &client)
+{
+    if (client.request.chunked.chunk_size == -1 && !get_chunk_size(client))
+        return (false);
+    if (client.request.chunked.chunk_size == 0)
+    {
+        client.request.chunked.end = 1;
+        return (true);
+    }
+    if (is_chunk_complete(client))
+         return (chunk_processing(client));
+    return (true);
+}
+
 int unchunk_data(t_client &client)
 {
-    std::string ending("\r\n0\r\n");
-    int ending_pos;
-    int end = 0;
-    int i = 0;
-    int k = 0;
-    int last_chunk;
-    int chunk_size = 0;
-    std::string new_request;
-
-    if ((ending_pos = client.request.request.find(ending.c_str())) != -1)
-        end = 1;
-    else
-        ending_pos = client.request.request.size() - 1;
-    while (i < ending_pos)
+    std::cout << client.request.request << std::endl;
+    if (client.request.request.size() == 0)
+        return (0);
+    client.request.chunked.cache += client.request.request.substr(client.request.chunked.i, client.request.request.size() - client.request.chunked.i);
+    client.request.request = client.request.request.substr(0, client.request.chunked.i);
+    if (!chunk_processing(client))
     {
-        last_chunk = 0;
-        if (is_chunk_size(client.request.request, i, client))
-        {
-            if (k != 0)
-                k = k - 2;
-            if (k != chunk_size)
-            {
-                client.request.res = "HTTP/1.1 400 Bad Request\r\n\r\n";
-                return (-1);
-            }
-            chunk_size = get_size(client.request.request, i) + 2;
-            k = 0;
-            last_chunk = 1;
-            client.request.chunked.chunk_size += chunk_size;
-            while (client.request.request[i] && client.request.request[i] != '\n')
-                i++;
-            if (client.request.request[i] != '\n')
-            {
-                client.request.res = "HTTP/1.1 400 Bad Request\r\n\r\n";
-                return (-1);
-            }
-            i++;
-        }
-        remove_crlf(new_request, last_chunk, chunk_size);
-        client.request.chunked.current_len += 1;
-        new_request += client.request.request[i];
-        k++;
-        i++;
-    }
-    remove_crlf(new_request, last_chunk, chunk_size);
-    if (k != chunk_size)
-    {
-        client.request.res = "HTTP/1.1 400 Bad Request\r\n\r\n";
+        client.request.res = "HTTP/1.1 400 Bad Request\r\nr\n";
+        client.read_fd = 0;
+		client.request.pt_data.on = 0;
+        client.request.chunked.end = 1;
         return (-1);
     }
-    client.request.request = new_request;
-    if (end)
-    {
-        client.request.chunked.chunk_size = 0;
-        client.request.chunked.current_len = 0;
-    }
-    return (end);
+    if (client.request.chunked.end)
+        return (1);
+    return (0);
 }

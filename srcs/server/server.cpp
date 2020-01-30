@@ -105,6 +105,7 @@ void ft_recv(std::vector<t_client>::iterator &it, char *buffer, std::vector<t_cl
 	std::string error;
 	int ret;
 
+	ft_reset_last_action_client(*it);
 	if ((ret = ft_read(*it, buffer)) <= 0)
 	{
 		ft_disconnect_client(it, clients, ini_set_read, ini_set_write);
@@ -189,7 +190,6 @@ void ft_server(std::vector<t_server> &servers)
 		}
 		for (std::vector<t_client>::iterator it(clients.begin()); it != clients.end(); it++) /* old client */
 		{
-			ft_reset_last_action_client(*it);
 			if (FD_ISSET(it->fd, &ret_set_write)) /* WRITE / CLOSE */
 			{
 				temp_paht_2 = it->server->root;
@@ -197,10 +197,7 @@ void ft_server(std::vector<t_server> &servers)
 				if (it->request.pt_data.on)
 				{
 					if (!ft_request_handling(*it))
-					{
-						it->request.request.clear();
 						FD_CLR(it->fd, &ini_set_write);
-					}
 				}
 				else if (!it->request.res.empty())
 				{
@@ -228,7 +225,8 @@ void ft_server(std::vector<t_server> &servers)
 				}
 				else if (!ft_request_handling(*it))
 				{
-					it->request.request.clear();
+					if (!it->request.pt_data.on)
+						it->request.request.clear();
 					FD_CLR(it->fd, &ini_set_write);
 				}
 				chdir(temp_paht_2.c_str());

@@ -59,6 +59,7 @@ int	ft_send(t_client &client)
 {
 	int ret(-1);
 
+	ft_reset_last_action_client(client);
 	if (client.ssl_fd != NULL)
 		ret = SSL_write(client.ssl_fd , client.request.res.c_str(), client.request.res.size());
 	else

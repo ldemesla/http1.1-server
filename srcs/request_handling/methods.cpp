@@ -64,6 +64,26 @@ bool					ft_get(t_client &client)
 	return (true);
 }
 
+
+bool is_end(t_client client)
+{
+	std::map<std::string, std::string>::iterator it;
+	std::map<std::string, std::string>::iterator it2;
+	std::map<std::string, std::string>::iterator it3;
+	std::map<std::string, std::string>::iterator end;
+
+	it = client.request.headers.find("Transfer-Encoding");
+	it2 = client.request.headers.find("Content-Encoding");
+	it3 = client.request.headers.find("Content-Length");
+	end = client.request.headers.end();
+	if (it != end && (!it->second.compare("chunked") || !it->second.compare("chunked, gzip") || !it->second.compare("gzip, chunked")) && !client.request.pt_data.end)
+		return (false);
+	if (it != end && (!it->second.compare("gzip") || (it2 != client.request.headers.end() && (!it2->second.compare("gzip") && ((int)client.request.pt_data.compress_req.size() < client.request.pt_data.size)))))
+		return (false);
+	else if (it != end && client.request.pt_data.size > client.request.bytes_read)
+		return (false);
+	return (true);
+}
 bool					ft_post(t_client &client)
 {
 	std::string multipart("multipart/");
@@ -88,6 +108,13 @@ bool					ft_post(t_client &client)
     {
         client.request.pt_data.size = -1;
         client.request.pt_data.end = unchunk_data(client);
+		if (client.request.request.size() > 65000)
+		{
+			client.request.res = "HTTP/1.1 413 Payload Too Large\\r\n\r\n";
+        	client.read_fd = 0;
+			client.request.pt_data.on = 0;
+			return (false);
+		}
     }
     else
         client.request.pt_data.size = std::stoi(it2->second);
@@ -100,10 +127,13 @@ bool					ft_post(t_client &client)
 			client.request.res = "HTTP/1.1 413 Payload Too Large\\r\n\r\n";
         	client.read_fd = 0;
 			client.request.pt_data.on = 0;
-			return (true);
+			return (false);
 		}
         if (!client.request.pt_data.end && ((int)client.request.pt_data.compress_req.size() < client.request.pt_data.size || (client.request.pt_data.size == -1)))
-			return (true);
+		{
+			std::cout << client.request.pt_data.end << std::endl;
+			return (false);
+		}
 		fd = open(temp.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0664);
 		write(fd, client.request.pt_data.compress_req.c_str(), client.request.pt_data.compress_req.size());
 		close(fd);
@@ -127,14 +157,15 @@ bool					ft_post(t_client &client)
 		client.request.file_size = info.st_size;
 		client.request.res = generate_200_header(0, client.request.file, client.request.file_size);
 	}
-	if ((client.request.pt_data.size > client.request.bytes_read) && !client.request.pt_data.end && client.request.pt_data.size > (int)client.request.pt_data.compress_req.size())
+	if (!is_end(client))
 	{
+		client.request.res.clear();
 		close(client.read_fd);
-		return (true);
+		return (false);
 	}
-	client.request.pt_data.on = 0;
-	if (!client.read_fd)
+	if (!client.read_fd && !client.request.pt_data.on)
 		load_error_page(client);
+	client.request.pt_data.on = 0;
 	ret = read(client.read_fd, buffer, MAX_SIZE);
 	if (ret < MAX_SIZE)
 	{
