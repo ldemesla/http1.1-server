@@ -23,7 +23,6 @@ void	ft_cut_conf_path(std::string &path)
 	path = path.substr(0, i);
 	new_path += path;
 	path = new_path;
-	// chdir(path.c_str());
 }
 
 void	ft_init_fd_set(std::vector<t_server> &server, fd_set &ini_set_read, fd_set &ini_set_write)

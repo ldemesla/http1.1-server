@@ -75,6 +75,8 @@ bool					ft_put(t_client &client)
         fd = open_temp_file(client, client.temp_file, O_RDONLY, 0);
         while ((ret = read(fd, buffer, PUT_BUFFER_SIZE + 1)) > 0)
             write(final_fd, buffer, ret);
+        close(fd);
+        close(final_fd);
         delete_temp_file(client, client.temp_file);
         client.request.request.clear();
 	    ft_send(client);
