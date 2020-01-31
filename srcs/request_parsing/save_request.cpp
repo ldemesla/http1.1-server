@@ -85,7 +85,7 @@ bool file_exit(t_client &client)
     else if ((!client.request.file.compare("") && !client.request.loc.listing.compare("on")) || !client.request.method.compare("PUT")
     || (info.st_mode & S_IFDIR && !client.request.loc.listing.compare("on")))
     {
-        if (!client.request.method.compare("PUT") && info.st_mode & S_IFDIR)
+        if (!client.request.method.compare("PUT") && ((info.st_mode & S_IFDIR) || !client.request.file.size()))
         {
             client.request.res = "HTTP/1.1 400 Bad Request\r\n\r\n";
             client.read_fd = 0;
