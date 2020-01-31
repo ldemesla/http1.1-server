@@ -250,14 +250,13 @@ bool 						modified_since(const std::string &header, const std::string &file);
 std::string 				set_header(t_client &client, std::string file);
 void 						load_error_page(t_client &client);
 
-std::string					ft_get_initial_path();
 typedef void(*server_set_function)(t_server &server, std::string &line_string);
 typedef void(*location_set_function)(t_location &location, std::string &line_string);
 
 int							error(std::string err, bool perror_mod);
 void						ft_server(std::vector<t_server> &servers);
 void						ft_init_fd_set(std::vector<t_server> &server, fd_set &ini_set_read, fd_set &ini_set_write);
-void						ft_init_server(std::vector<t_server> *server, char **av, const std::string &initial_path);
+void						ft_init_server(std::vector<t_server> *server, char **av);
 bool 						parse_header(t_request &request, t_server *server);
 void 						ft_parse_conf(std::vector<t_server> *server, char **av);
 bool						ft_path_with_slash(char *path);
