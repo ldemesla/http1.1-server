@@ -25,7 +25,7 @@ std::string generate_304_header(int gzip, std::string file)
     return (header);
 }
 
-void get_location(t_server *server, t_request &request)
+bool get_location(t_client &client)
 {
 	std::vector<t_location>::iterator	it;
 	std::vector<t_location>::iterator	ending;
@@ -33,18 +33,18 @@ void get_location(t_server *server, t_request &request)
 	std::string							path;
 	int i;
 
-    route = get_route(request);
+    route = get_route(client.request);
 	path = route;
 	i = route.size() - 1;
-	it = server->location.begin();
-	ending = server->location.end();
+	it = client.server->location.begin();
+	ending = client.server->location.end();
 	while (it != ending)
 	{
        	if ((*it).location.compare(route) == 0)
 		{
-			request.loc = *it;
-			request.file.clear();
-			return ;
+			client.request.loc = *it;
+			client.request.file.clear();
+			return true;
 		}
 		it++;
 	}
@@ -53,17 +53,19 @@ void get_location(t_server *server, t_request &request)
 		while (route[i] != '/' && i != 0)
 			i--;
 		route = route.substr(0, i);
-		it = server->location.begin();
-		ending = server->location.end();
+		it = client.server->location.begin();
+		ending = client.server->location.end();
 		while (it != ending)
 		{
 			if (!it->location.compare(route))
 			{
-				request.loc = *it;
-				request.file = path.substr(it->location.size(), path.size() - it->location.size());
-				return ;
+				client.request.loc = *it;
+				client.request.file = path.substr(it->location.size(), path.size() - it->location.size());
+				return true;
 			}
 			it++;
 		}
 	} while (route.size() > 0);
+	load_error_page(client);
+	return (false);
 }

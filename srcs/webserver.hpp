@@ -242,7 +242,7 @@ std::string 				generate_304_header(int gzip, std::string file);
 bool 						is_end(t_client client);
 
 bool 						ft_save_request(char *buffer, std::vector<t_client>::iterator &it, int ret);
-void						get_location(t_server *server, t_request &request);
+bool						get_location(t_client &client);
 bool						if_match(const std::string &line, const std::string &file_name);
 std::vector<t_etag>  		ft_parse_line_etag(const std::string &line);
 std::string 				ft_get_features(const std::string &file_name, const int mod);

@@ -35,22 +35,26 @@ bool check_method_exist(t_request &request)
     return (true);
 }
 
-bool check_method_allowed(t_request &request, t_server *server)
+bool check_method_allowed(t_client &client)
 {
     std::vector<std::string>::iterator end;
     std::vector<std::string>::iterator it;
-    get_location(server, request);
-    end = request.loc.methods.end();
-    it = request.loc.methods.begin();
+    if (!get_location(client))
+    {
+        load_error_page(client);
+        return (false);
+    }
+    end = client.request.loc.methods.end();
+    it = client.request.loc.methods.begin();
     while (it != end)
     {
-        if (!request.method.compare(*it))
+        if (!client.request.method.compare(*it))
             break ;
         it++;
     }
     if (it == end)
     {
-        request.res = "HTTP/1.1 405 Method Not Allowed\r\n\r\n";
+        client.request.res = "HTTP/1.1 405 Method Not Allowed\r\n\r\n";
         return (false);
     }
     return (true);
@@ -141,7 +145,7 @@ bool get_info(t_client &client)
     std::map<std::string, std::string>::iterator it2;
     std::map<std::string, std::string>::iterator end;
 
-    if (!check_method_exist(client.request) || !check_method_allowed(client.request, client.server)
+    if (!check_method_exist(client.request) || !check_method_allowed(client)
     || !file_exit(client) ||  !parse_header(client.request, client.server))
         return (false);
     remove_headers(client.request);
