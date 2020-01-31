@@ -82,7 +82,6 @@ void ft_init_server(std::vector<t_server> *server, char **av, const std::string 
     		it->ctx = create_context();
     		configure_context(it->ctx, *it);
 			SSL_CTX_set_verify(it->ctx, SSL_VERIFY_NONE, krx_ssl_verify_peer);
-		}		
-		std::cout << "it->root = " << it->root << std::endl;											/* tls end*/
+		}											/* tls end*/
 	}
 }
