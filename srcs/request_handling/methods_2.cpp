@@ -74,6 +74,7 @@ bool					ft_put(t_client &client)
 	}
     if ((client.request.pt_data.size >= 0 &&  client.request.pt_data.size <= client.request.bytes_read) ||  client.request.pt_data.end)
     {
+        client.request.request.clear();
 	    ft_send(client);
         client.request.pt_data.on = 0;
         client.request.bytes_read = 0;
