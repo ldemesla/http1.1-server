@@ -23,7 +23,6 @@ void	ft_cut_conf_path(std::string &path)
 	path = path.substr(0, i);
 	new_path += path;
 	path = new_path;
-	chdir(path.c_str());
 }
 
 void	ft_init_fd_set(std::vector<t_server> &server, fd_set &ini_set_read, fd_set &ini_set_write)
@@ -35,7 +34,7 @@ void	ft_init_fd_set(std::vector<t_server> &server, fd_set &ini_set_read, fd_set 
 		FD_SET(it->fd, &ini_set_read);
 }
 
-void ft_init_server(std::vector<t_server> *server, char **av)
+void ft_init_server(std::vector<t_server> *server, char **av, const std::string &initial_path)
 {
 	int un;
 	std::vector<t_server>::iterator end(server->end());
@@ -43,6 +42,8 @@ void ft_init_server(std::vector<t_server> *server, char **av)
 
 	for (std::vector<t_server>::iterator it(server->begin()); it != end; it++)
 	{
+		if (chdir(initial_path.c_str()) < 0)
+			error("chdir", true);
 		if (av[1] == NULL)
 		{
 			it->root += ft_cut_path(av[0]);
@@ -57,7 +58,8 @@ void ft_init_server(std::vector<t_server> *server, char **av)
 		else
 			it->root = ft_cut_path((char *)it->root.c_str());
 		
-		chdir(it->root.c_str());
+		if (chdir(it->root.c_str()) < 0)
+			error("chdir", true);
 		if ((it->fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 			error("socket()", true);
 		if (setsockopt(it->fd,  SOL_SOCKET, SO_REUSEADDR, &un, sizeof(int)) < 0)
@@ -80,6 +82,7 @@ void ft_init_server(std::vector<t_server> *server, char **av)
     		it->ctx = create_context();
     		configure_context(it->ctx, *it);
 			SSL_CTX_set_verify(it->ctx, SSL_VERIFY_NONE, krx_ssl_verify_peer);
-		}																		/* tls end*/
+		}		
+		std::cout << "it->root = " << it->root << std::endl;											/* tls end*/
 	}
 }

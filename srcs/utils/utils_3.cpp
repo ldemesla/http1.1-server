@@ -65,3 +65,14 @@ bool is_end(t_client client)
 		return (false);
 	return (true);
 }
+
+std::string	ft_get_initial_path()
+{
+	std::string		initial_path;
+	char			buffer[GETCWD_BUFFER_SIZE + 1];
+	
+	if (getcwd(buffer, GETCWD_BUFFER_SIZE) == NULL)
+		error("getcwd", true);
+	initial_path = buffer;
+	return (initial_path);
+}
