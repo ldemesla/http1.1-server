@@ -24,7 +24,7 @@
 
 # define TIME_OUT_SELECT_SEC			0
 # define TIME_OUT_SELECT_USEC			500000 /* 1000000 u_sec == 1 sec */
-# define TIME_OUT_CLIENT_SEC			30
+# define TIME_OUT_CLIENT_SEC			10
 # define FORCE_TIME_OUT_CLIENT			30
 
 # define INITAL_USED_FD					2

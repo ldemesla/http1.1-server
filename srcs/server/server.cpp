@@ -197,11 +197,13 @@ void ft_server(std::vector<t_server> &servers)
 				chdir(it->request.loc.root.c_str());
 				if (it->request.pt_data.on)
 				{
+					std::cout << "here\n";
 					if (!ft_request_handling(*it))
 						FD_CLR(it->fd, &ini_set_write);
 				}
 				else if (!it->request.res.empty())
 				{
+					std::cout << "la\n";
 					if (ft_send(*it) == -1 || (it->disconnect && !it->read_fd))
 					{
 						delete_temp_file(*it, it->temp_file);
@@ -211,6 +213,7 @@ void ft_server(std::vector<t_server> &servers)
 				}
 				else if (it->read_fd != 0)
 				{
+					std::cout << "here\n";
 					ret = read(it->read_fd, read_buffer, MAX_SIZE);
 					if (ret < MAX_SIZE)
 					{
