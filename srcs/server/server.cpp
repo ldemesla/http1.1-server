@@ -5,6 +5,7 @@ void ft_disconnect_client(std::vector<t_client>::iterator &it, std::vector<t_cli
 	close(it->fd);
 	FD_CLR(it->fd, &ini_set_read);
 	FD_CLR(it->fd, &ini_set_write);
+	delete_temp_file(*it, it->temp_file);
 	if (it->ssl_fd != NULL)
 	{
 		SSL_shutdown(it->ssl_fd);

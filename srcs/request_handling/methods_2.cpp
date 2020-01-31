@@ -3,6 +3,8 @@
 bool					ft_put(t_client &client)
 {
     int fd;
+    int ret;
+    int final_fd;
 	char buffer[PUT_BUFFER_SIZE + 1];
 	std::string file_name;
     std::string encoding[3] = {"chunked", "chunked, gzip", "gzip, chunked"};
@@ -36,10 +38,7 @@ bool					ft_put(t_client &client)
 		close(fd);
 		client.request.res = "HTTP/1.1 204 No Content\r\nDate: " + get_date() + "\r\nServer: Webserver/1.0\r\nContent-Location : " +
 			client.request.file + "\r\n\r\n";
-        if (client.request.pt_data.on)
-		    fd = open(client.request.file.c_str(), O_RDWR | O_APPEND);
-        else
-            fd = open(client.request.file.c_str(), O_TRUNC | O_RDWR);
+        fd = open_temp_file(client, client.temp_file, O_RDWR | O_APPEND | O_CREAT, 0666);
         client.request.pt_data.on = 1;
 		client.request.bytes_read += write(fd, client.request.request.c_str(), client.request.request.size());
 		close(fd);
@@ -64,16 +63,19 @@ bool					ft_put(t_client &client)
 			client.request.res = "HTTP/1.1 204 No Content\r\nDate: " + get_date() + "\r\nServer: Webserver/1.0\r\nContent-Location: " +
 				file_name + "\r\n\r\n";
 		}
-        if (client.request.pt_data.on)
-		    fd = open(client.request.file.c_str(), O_RDWR | O_APPEND | O_CREAT, 0666);
-        else
-            fd = open(client.request.file.c_str(), O_CREAT | O_RDWR | O_TRUNC, 0666);
+        fd = open_temp_file(client, client.temp_file, O_RDWR | O_APPEND | O_CREAT, 0666);
         client.request.pt_data.on = 1;
         client.request.bytes_read += write(fd, client.request.request.c_str(), client.request.request.size());
+        close(fd);
 		chdir(buffer);
 	}
     if ((client.request.pt_data.size >= 0 &&  client.request.pt_data.size <= client.request.bytes_read) ||  client.request.pt_data.end)
     {
+        final_fd = open(file_name.c_str(), O_TRUNC | O_RDWR | O_CREAT, 0666);
+        fd = open_temp_file(client, client.temp_file, O_RDONLY, 0);
+        while ((ret = read(fd, buffer, PUT_BUFFER_SIZE + 1)) > 0)
+            write(final_fd, buffer, ret);
+        delete_temp_file(client, client.temp_file);
         client.request.request.clear();
 	    ft_send(client);
         client.request.pt_data.on = 0;

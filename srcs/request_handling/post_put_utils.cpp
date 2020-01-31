@@ -77,6 +77,7 @@ int unchunk_data(t_client &client)
     client.request.request = client.request.request.substr(0, client.request.chunked.i);
     if (!chunk_processing(client))
     {
+        delete_temp_file(client, client.temp_file);
         client.request.res = "HTTP/1.1 400 Bad Request\r\n\r\n";
         client.read_fd = 0;
 		client.request.pt_data.on = 0;

@@ -29,7 +29,6 @@ bool check_method_exist(t_request &request)
     }
     if (i == METHODS_NBR)
     {
-        std::cout << request.request << std::endl;
         request.res = "HTTP/1.1 400 Bad Request\r\n\r\n";
         return (false);
     }
