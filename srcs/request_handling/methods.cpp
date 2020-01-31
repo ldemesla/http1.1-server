@@ -98,7 +98,8 @@ bool					ft_post(t_client &client)
 		else if (!is_end(client))
 		{
 			client.request.res.clear();
-			close(client.read_fd);
+			if (!client.read_fd)
+				close(client.read_fd);
 			return (false);
 		}
 		else if (client.request.pt_data.end == -1)
