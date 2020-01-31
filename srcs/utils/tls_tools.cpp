@@ -46,6 +46,16 @@ void configure_context(SSL_CTX *ctx, t_server &server)
 	SSL_CTX_set_ecdh_auto(ctx, 1);
 	
 	/* cert */
+	
+	if (chdir(server.root.c_str()) < 0)
+		error("chdir", true);
+		
+	char buffer[500];
+	
+	getcwd(buffer, 499);
+	std::cout << "server root = " << server.root << std::endl;
+	std::cout << "on est " << buffer << std::endl;
+	
 	if (server.cert_path.empty())
 	{
 		default_cert_path = false;
