@@ -238,6 +238,7 @@ bool 						format_res_range(t_client &client);
 std::string 				generate_error_page(int code);
 std::string 				ft_get_features(const std::string &file_name, const int mod);
 std::string 				generate_304_header(int gzip, std::string file);
+bool 						is_end(t_client client);
 
 bool 						ft_save_request(char *buffer, std::vector<t_client>::iterator &it, int ret);
 void						get_location(t_server *server, t_request &request);

@@ -64,26 +64,6 @@ bool					ft_get(t_client &client)
 	return (true);
 }
 
-
-bool is_end(t_client client)
-{
-	std::map<std::string, std::string>::iterator it;
-	std::map<std::string, std::string>::iterator it2;
-	std::map<std::string, std::string>::iterator it3;
-	std::map<std::string, std::string>::iterator end;
-
-	it = client.request.headers.find("Transfer-Encoding");
-	it2 = client.request.headers.find("Content-Encoding");
-	it3 = client.request.headers.find("Content-Length");
-	end = client.request.headers.end();
-	if (it != end && (!it->second.compare("chunked") || !it->second.compare("chunked, gzip") || !it->second.compare("gzip, chunked")) && !client.request.pt_data.end)
-		return (false);
-	if (it != end && (!it->second.compare("gzip") || (it2 != client.request.headers.end() && (!it2->second.compare("gzip") && ((int)client.request.pt_data.compress_req.size() < client.request.pt_data.size)))))
-		return (false);
-	else if (it != end && client.request.pt_data.size > client.request.bytes_read)
-		return (false);
-	return (true);
-}
 bool					ft_post(t_client &client)
 {
 	std::string multipart("multipart/");
@@ -143,10 +123,7 @@ bool					ft_post(t_client &client)
 			return (false);
 		}
         if (!client.request.pt_data.end && ((int)client.request.pt_data.compress_req.size() < client.request.pt_data.size || (client.request.pt_data.size == -1)))
-		{
-			std::cout << client.request.pt_data.end << std::endl;
 			return (false);
-		}
 		fd = open(temp.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0664);
 		write(fd, client.request.pt_data.compress_req.c_str(), client.request.pt_data.compress_req.size());
 		close(fd);
@@ -170,7 +147,7 @@ bool					ft_post(t_client &client)
 		client.request.file_size = info.st_size;
 		client.request.res = generate_200_header(0, client.request.file, client.request.file_size);
 	}
-	if (!is_end(client))
+	if (!((client.request.pt_data.size >= 0 && client.request.pt_data.size <= client.request.bytes_read) || ((int)client.request.pt_data.compress_req.size() >= client.request.pt_data.size) ||  client.request.pt_data.end))
 	{
 		client.request.res.clear();
 		close(client.read_fd);

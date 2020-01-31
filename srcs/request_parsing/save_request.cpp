@@ -3,6 +3,7 @@
 bool check_method_exist(t_request &request)
 {
     int i;
+    int k;
     t_methods methods;
     std::string temp;
     std::string version("HTTP/1.1");
@@ -12,15 +13,16 @@ bool check_method_exist(t_request &request)
     {
         if (!request.request.compare(0, methods.methods[i].size(), methods.methods[i]))
         {
+            k = i;
             request.method = request.request.substr(0, methods.methods[i].size() - 2);
             i = 0;
-            while (request.request[i] != '\r')
-                i++;
+            while (request.request[k] != '\r')
+                k++;
             temp = request.request.substr(request.method.size() + 1, i - (request.method.size() + 1));
             i = 0;
-            while (temp[i] && temp[i] != ' ')
-                i++;
-            if (!temp[i] || temp[i] != ' ' || temp.find(version) == (unsigned long)-1)
+            while (temp[k] && temp[k] != ' ')
+                k++;
+            if (!temp[k] || temp[k] != ' ' || temp.find(version) == (unsigned long)-1)
                 i = METHODS_NBR;
             break ;
         }
@@ -160,6 +162,7 @@ bool ft_save_request(char *buffer, std::vector<t_client>::iterator &it, int ret)
     int i;
     int header = 0;
 
+    std::cout << buffer << std::endl;
     i = 0;
     if (!it->request.pt_data.on)
     {

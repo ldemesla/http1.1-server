@@ -48,6 +48,8 @@ bool is_chunk_complete(t_client &client)
         client.request.chunked.cache = client.request.chunked.cache.substr(i, client.request.chunked.cache.size() - i);
         client.request.chunked.chunk_size = -1;
         client.request.chunked.i = client.request.request.size();
+        if (!client.request.method.compare("PUT"))
+            client.request.chunked.i = 0;
         return (true);
     }
     return (false);

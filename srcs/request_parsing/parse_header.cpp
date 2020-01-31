@@ -107,7 +107,7 @@ bool check_error_header(t_request &request, t_server *server)
             }
             
         }
-        if ((std::stoi(it->second) > 65000 && !request.method.compare("PUT")) || 
+        if ((std::stoi(it->second) > 65000 && !request.method.compare("POST")) || 
         body_size(request.request, server) == false)
         {
             request.res = "HTTP/1.1 413 Payload Too Large\r\n\r\n";

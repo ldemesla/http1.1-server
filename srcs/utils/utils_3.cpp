@@ -44,3 +44,24 @@ bool	ft_path_with_slash(char *path)
 {
 	return (path != NULL && path[0] == '/');
 }
+
+
+bool is_end(t_client client)
+{
+	std::map<std::string, std::string>::iterator it;
+	std::map<std::string, std::string>::iterator it2;
+	std::map<std::string, std::string>::iterator it3;
+	std::map<std::string, std::string>::iterator end;
+
+	it = client.request.headers.find("Transfer-Encoding");
+	it2 = client.request.headers.find("Content-Encoding");
+	it3 = client.request.headers.find("Content-Length");
+	end = client.request.headers.end();
+	if (it != end && (!it->second.compare("chunked") || !it->second.compare("chunked, gzip") || !it->second.compare("gzip, chunked")) && !client.request.pt_data.end)
+		return (false);
+	if (it != end && (!it->second.compare("gzip") || (it2 != client.request.headers.end() && (!it2->second.compare("gzip") && ((int)client.request.pt_data.compress_req.size() < client.request.pt_data.size)))))
+		return (false);
+	else if (it != end && client.request.pt_data.size > client.request.bytes_read)
+		return (false);
+	return (true);
+}

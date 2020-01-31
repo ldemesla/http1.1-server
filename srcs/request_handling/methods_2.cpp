@@ -19,15 +19,17 @@ bool					ft_put(t_client &client)
     {
         client.request.pt_data.size = -1;
         client.request.pt_data.end = unchunk_data(client);
+		if (client.request.pt_data.end == -1)
+		{
+            close(fd);
+			ft_send(client);
+        	client.request.pt_data.on = 0;
+			client.disconnect = 1;
+			return (false);
+		}
     }
     else
         client.request.pt_data.size = std::stoi(it2->second);
-    if (client.request.pt_data.end == -1)
-    {
-        close(fd); 
-        ft_send(client);
-        client.request.pt_data.on = 0;
-    }
 	if (fd > 0)
 	{
         file_name = client.request.file;
@@ -44,6 +46,7 @@ bool					ft_put(t_client &client)
 	}
 	else
 	{
+
 		if (client.request.loc.save.compare(""))
 		{
 			file_name = get_file_name(client.request.file.c_str());
@@ -62,7 +65,7 @@ bool					ft_put(t_client &client)
 				file_name + "\r\n\r\n";
 		}
         if (client.request.pt_data.on)
-		    fd = open(client.request.file.c_str(), O_RDWR | O_APPEND);
+		    fd = open(client.request.file.c_str(), O_RDWR | O_APPEND | O_CREAT, 0666);
         else
             fd = open(client.request.file.c_str(), O_CREAT | O_RDWR | O_TRUNC, 0666);
         client.request.pt_data.on = 1;
@@ -82,7 +85,9 @@ bool					ft_put(t_client &client)
             ft_inflate_file_fd(file_name);
         return (false);
     }
-    return (true);
+    client.request.request.clear();
+    client.request.res.clear();
+    return (false);
 }
 
 bool					ft_connect(t_client &client)
