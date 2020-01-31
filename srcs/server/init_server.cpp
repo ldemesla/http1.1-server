@@ -35,17 +35,15 @@ void	ft_init_fd_set(std::vector<t_server> &server, fd_set &ini_set_read, fd_set 
 		FD_SET(it->fd, &ini_set_read);
 }
 
-void ft_init_server(std::vector<t_server> *server, char **av, const std::string &initial_path)
+void ft_init_server(std::vector<t_server> *server, char **av)
 {
 	int un;
 	std::vector<t_server>::iterator end(server->end());
 	bool	openssl_is_init(false);
 
-	std::cout << "initial_path = " << initial_path << std::endl; 
-	
 	for (std::vector<t_server>::iterator it(server->begin()); it != end; it++)
 	{
-		if (chdir(initial_path.c_str()) < 0)
+		if (chdir(g_initial_path.c_str()) < 0)
 			error("chdir", true);
 
 		if (av[1] == NULL)
@@ -53,23 +51,15 @@ void ft_init_server(std::vector<t_server> *server, char **av, const std::string 
 			it->root += ft_cut_path(av[0]);
 			it->root += '/';
 			it->root += DEFAULT_CONF_PATH;
-			std::cout << "if" << std::endl;
 		}
 		else
-		{
-			std::cout << "else" << std::endl;
 			it->root = av[1];
-		}
-		
-		std::cout << "it->root 1 = " << it->root << std::endl;
-		
 		
 		if (!ft_path_with_slash((char *)it->root.c_str()))
 			ft_cut_conf_path(it->root);
 		else
 			it->root = ft_cut_path((char *)it->root.c_str());
 		
-		std::cout << "it->root 2 = " << it->root << std::endl;
 		chdir(it->root.c_str());
 		if ((it->fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 			error("socket()", true);
@@ -93,6 +83,6 @@ void ft_init_server(std::vector<t_server> *server, char **av, const std::string 
     		it->ctx = create_context();
     		configure_context(it->ctx, *it);
 			SSL_CTX_set_verify(it->ctx, SSL_VERIFY_NONE, krx_ssl_verify_peer);
-		}																		/* tls end*/
+		}
 	}
 }

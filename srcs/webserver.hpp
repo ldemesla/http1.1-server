@@ -207,6 +207,7 @@ typedef struct s_cleaner
 }				t_cleaner;
 
 extern t_cleaner				g_cleaner;
+extern std::string				g_initial_path;
 
 int 						unchunk_data(t_client &client);
 void						ft_sigint_signal_catcher(int n);
@@ -256,7 +257,7 @@ typedef void(*location_set_function)(t_location &location, std::string &line_str
 int							error(std::string err, bool perror_mod);
 void						ft_server(std::vector<t_server> &servers);
 void						ft_init_fd_set(std::vector<t_server> &server, fd_set &ini_set_read, fd_set &ini_set_write);
-void						ft_init_server(std::vector<t_server> *server, char **av, const std::string &initial_path);
+void						ft_init_server(std::vector<t_server> *server, char **av);
 bool 						parse_header(t_request &request, t_server *server);
 void 						ft_parse_conf(std::vector<t_server> *server, char **av);
 bool						ft_path_with_slash(char *path);

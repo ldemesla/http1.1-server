@@ -47,14 +47,8 @@ void configure_context(SSL_CTX *ctx, t_server &server)
 	
 	/* cert */
 	
-	if (chdir(server.root.c_str()) < 0)
-		error("chdir", true);
-		
-	char buffer[500];
-	
-	getcwd(buffer, 499);
-	std::cout << "server root = " << server.root << std::endl;
-	std::cout << "on est " << buffer << std::endl;
+	// if (chdir(server.root.c_str()) < 0)
+		// error("chdir", true);
 	
 	if (server.cert_path.empty())
 	{
