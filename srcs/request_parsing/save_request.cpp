@@ -13,13 +13,12 @@ bool check_method_exist(t_request &request)
     {
         if (!request.request.compare(0, methods.methods[i].size(), methods.methods[i]))
         {
-            k = i;
             request.method = request.request.substr(0, methods.methods[i].size() - 2);
-            i = 0;
+            k = 0;
             while (request.request[k] != '\r')
                 k++;
             temp = request.request.substr(request.method.size() + 1, i - (request.method.size() + 1));
-            i = 0;
+            k = 0;
             while (temp[k] && temp[k] != ' ')
                 k++;
             if (!temp[k] || temp[k] != ' ' || temp.find(version) == (unsigned long)-1)
