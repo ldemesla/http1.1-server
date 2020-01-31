@@ -162,7 +162,6 @@ bool ft_save_request(char *buffer, std::vector<t_client>::iterator &it, int ret)
     int i;
     int header = 0;
 
-    std::cout << buffer << std::endl;
     i = 0;
     if (!it->request.pt_data.on)
     {
