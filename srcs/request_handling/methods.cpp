@@ -168,6 +168,7 @@ bool					ft_post(t_client &client)
 	}
 	client.request.res.append(buffer, ret);
 	ft_send(client);
+	client.request.request.clear();
 	client.request.bytes_read = 0;
 	if (client.read_fd == 0)
 		return (false);
