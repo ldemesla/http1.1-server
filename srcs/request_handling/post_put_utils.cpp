@@ -10,6 +10,7 @@ bool is_not_hex(char c)
 bool get_chunk_size(t_client &client)
 {
     int i;
+    std::string hex_size;
 
     i = 0;
     while (client.request.chunked.cache[i])
@@ -22,7 +23,10 @@ bool get_chunk_size(t_client &client)
         return (true);
     else if (client.request.chunked.cache[i] != '\r')
         return (false);
-    client.request.chunked.chunk_size = ft_hex_to_dec(client.request.chunked.cache.substr(0, i));
+    hex_size = client.request.chunked.cache.substr(0, i);
+    if (hex_size.size() == 0)
+        return (false);
+    client.request.chunked.chunk_size = ft_hex_to_dec(hex_size);
     i += 2;
     client.request.chunked.cache = client.request.chunked.cache.substr(i, client.request.chunked.cache.size());
     return (true);
@@ -65,17 +69,17 @@ bool chunk_processing(t_client &client)
 
 int unchunk_data(t_client &client)
 {
-    std::cout << client.request.request << std::endl;
     if (client.request.request.size() == 0)
         return (0);
     client.request.chunked.cache += client.request.request.substr(client.request.chunked.i, client.request.request.size() - client.request.chunked.i);
     client.request.request = client.request.request.substr(0, client.request.chunked.i);
     if (!chunk_processing(client))
     {
-        client.request.res = "HTTP/1.1 400 Bad Request\r\nr\n";
+        client.request.res = "HTTP/1.1 400 Bad Request\r\n\r\n";
         client.read_fd = 0;
 		client.request.pt_data.on = 0;
         client.request.chunked.end = 1;
+        client.disconnect = 1;
         return (-1);
     }
     if (client.request.chunked.end)

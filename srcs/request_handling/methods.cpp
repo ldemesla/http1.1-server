@@ -115,6 +115,19 @@ bool					ft_post(t_client &client)
 			client.request.pt_data.on = 0;
 			return (false);
 		}
+		else if (!is_end(client))
+		{
+			client.request.res.clear();
+			close(client.read_fd);
+			return (false);
+		}
+		else if (client.request.pt_data.end == -1)
+		{
+			ft_send(client);
+        	client.request.pt_data.on = 0;
+			client.disconnect = 1;
+			return (false);
+		}
     }
     else
         client.request.pt_data.size = std::stoi(it2->second);
