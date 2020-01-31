@@ -256,7 +256,7 @@ typedef void(*location_set_function)(t_location &location, std::string &line_str
 int							error(std::string err, bool perror_mod);
 void						ft_server(std::vector<t_server> &servers);
 void						ft_init_fd_set(std::vector<t_server> &server, fd_set &ini_set_read, fd_set &ini_set_write);
-void						ft_init_server(std::vector<t_server> *server, char **av);
+void						ft_init_server(std::vector<t_server> *server, char **av, const std::string &initial_path);
 bool 						parse_header(t_request &request, t_server *server);
 void 						ft_parse_conf(std::vector<t_server> *server, char **av);
 bool						ft_path_with_slash(char *path);
@@ -329,7 +329,7 @@ std::string					ft_generate_listing_page(t_client &client);
 void						ft_reset_last_action_client(t_client &client);
 unsigned long 				ft_get_last_action_client(t_client &client);
 int    						ft_timeout_clients(std::vector<t_client>::iterator it, std::vector<t_client> &clients, fd_set &ini_set_read, fd_set &ini_set_write);
-
+std::string					ft_get_initial_path(void);
 
 void						ft_disconnect_client(std::vector<t_client>::iterator &it, std::vector<t_client> &clients, fd_set &ini_set_read, fd_set &ini_set_write);
 struct timeval				ft_init_timeout_select(time_t sec, time_t u_sec);
