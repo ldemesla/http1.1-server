@@ -53,7 +53,8 @@ bool					ft_get(t_client &client)
 	ret = read(client.read_fd, buffer, MAX_SIZE);
 	if (ret < MAX_SIZE)
 	{
-		close(client.read_fd);
+		if (!client.read_fd)
+			close(client.read_fd);
 		delete_temp_file(client, client.temp_file);
 		client.read_fd = 0;
 	}
@@ -119,7 +120,8 @@ bool					ft_post(t_client &client)
 		if (client.request.pt_data.compress_req.size() > 65000)
 		{
 			client.request.res = "HTTP/1.1 413 Payload Too Large\\r\n\r\n";
-        	client.read_fd = 0;
+			if (!client.read_fd)
+        		client.read_fd = 0;
 			client.request.pt_data.on = 0;
 			return (false);
 		}
